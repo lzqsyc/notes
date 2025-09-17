@@ -1,0 +1,280 @@
+
+echo hello > linux.txt          将hello写入文件linux.txt，会覆盖文件内容
+echo -e "余伟杰\n是大帅哥\n"      # 帅啊
+cat < linux.txt                 将文件linux.txt的内容打印输出到终端
+echo hello_world >> linux.txt   将内容 hello_world 追加到linux.txt 文件中去
+    
+|           管道，将一个命令的输出作为另一个命令的标准输入，可以进行多命令管道理解
+            通俗理解就是将数据流向不同命令的一个桥梁
+            命令格式：command A | command B
+    比如：./semester | grep -i "last-modified"   执行semseter文件，并提取打印last-modified 所在行
+
+文本处理四剑客：
+    grep   搜索文本，返回匹配行
+        命令格式：grep 选项参数 “匹配文本内容” 文件名
+        grep -n "语法格式：" linux.txt 
+        常用选项：-i(忽略大小写) -n(显示所在行) -H(显示文件名) -l(只列出匹配的文件名称) -E(使用扩展正则) -F(固定字符串匹配，所有字符失去特俗意义)        
+        特俗选项：-o(只输出匹配内容)  -c(统计匹配文本所在的行数总数) -v(输出与匹配相反的结果)         
+
+    sed    对文本进行流式编辑，替换，删除等文本操作    打印输出一定要加：p
+        命令格式：sed 参数选项 ‘匹配文本/替换文本/操作符‘ 文件名
+        sed 's/比如：/举例：/' linux.txt    将l;inux.txt 文件中的'比如：'替换成‘举例：‘ 
+        常用选项：'s/匹配文本/替换文本/'（单一替换）     's/匹配文本/替换文本/g' (全局替换)
+                ‘/匹配文本/d‘ (删除文本)              -n‘3，5p‘ (打印输出3到5行)
+
+    awk  本分析器 
+        awk '模式 {指令动作}' 文件名
+        内置变量：$0        整行内容(所有内容输出)
+            $1,$2,... 第1，2...个字段 (按列数输出,默认制表符分列)
+            NF        字段数量
+            NR        当前行号
+            FS        字段分隔符
+            OFS       输出字段分隔符
+            ~         匹配操作符
+            ==        精准匹配
+        基本打印：awk '{print $0}' access.log                    打印所有内容
+                awk '{print $1,$2,$3,$4}' access.last           打印出前4字段(前四列)
+        条件过滤：awk '$9==200 {print $0}' access.log             过滤第9字段中的200，然后打印整行
+        整行匹配：awk '/匹配文本/ {print $0}' access.log            匹配文本所在的行
+        字段匹配：awk '$6 ~ /^匹配文本/ {print $0}' access.log      
+
+    cut  提取指定的列、字段；记住：f1-4，从1到四所有字段，f1，4只有和字段
+        语法格式：cut 参数选项 文件名
+        常用参数：-d''     指定字段分隔符，分隔符格式为''的选择，比如‘ ’ 空格作为分隔符
+                -f       指定要提取的字段    cut -d' ' -f1-5 access.log   提取以空格为分隔符的第一段到第五段
+                -c        按字符位置，      cut -c1-15 access.log        提取每一行的第1个字符到15个字符之间的所有字符 
+                -b        按字节位置        cut -b1-3 access,log
+    wc  统计指定文件中的字节数、单词数、行数, 并将统计结果显示输出
+        -c      打印字节数
+        -m      打印字符数
+        -l      打印行数
+        -L      打印最长行的长度(字符数)
+        -w      打印单词数              
+ 
+chmod   用于改变或者设置文件/目录的访问权限
+        1、u-usr    文件所有者-创建该文件的用户
+        2、g-group  文件所有者所在的用户组，组内用户共享此权限
+        3、o-other  其他用户，并非以上两者
+语法格式：  chmod [参数] 模式 文件/目录 
+参数选项
+        1、-R：用更改权限，目标目录及其下面的所有文件和子目录权限都会被一起更改
+        2、-v：显示详细操作信息，为每一个处理的文件输出一条信息
+        3、-c：类似-v，但是只有在权限更改时才显示信息
+模式选择：
+        1、符号模式（symbolic mode）：用符号设置权限更加直观    chmod 用户类符号(u/g/o) +/- 权限(w/r/x)
+符号显示test.c的权限是：-rw-r--r--
+        chmod u+x test.c ——> 权限更改为：-rwx-r--r--
+        2、八进制模式（octal mode）：用数字来设置权限 1(x)  2(w)   4(r)
+数字显示test.c的权限是：644
+        chmod 744 test.c
+
+查看shell 命令 
+        1、向上箭头查看上一个历史shell 命令
+        2、history 查看历史shell 并且可以用管道与grep命令合作，按字符串查看相关命令
+
+查找文件和目录：find   会运用递归的方式自动进行指定目录以及其子目录寻找
+语法格式：find 路径 表达式
+        1、根据文件名 -iname(不区分大小写)     name    
+			find /home/luo/VScode/ysyx_lchw/ -iname "ex*.c"
+        2、根据文件类型 (-type 参数)  
+			f(普通文件)	d(目录)	l(符号链接)	b(块设备文件) c(字符设备文件) p(命名管道) 
+			find /home/luo/VScode/ -iname "ex*.c" -type f
+			find /home/luo/VScode -type f -iname "ex*.c"
+		3、按文件大小  -size 参数选项(cwbkmg)
+			1、-size c 	按字节
+			2、-size w	按字
+			3、-size b  512字节快（默认单位）
+			4、-size M  Megabytes (1024^2 bytes)
+			5、-size G  Gigabytes (1024^3 bytes)
+			参数选项前 +num：大于num   -num：小于num   啥也没有就是等于
+		4、根据时间查找 时间单位只有天数和分钟
+			1、-mtime +/-num ： - num天之内修改过的文件，+ num天之前修改过的   无+/- 恰好num天前
+			2、-mmin +/-num  ： - num分钟内修改过的文件，+ num分钟之前修改的   无+/- 恰好num分前
+			3、-atime num    ： 最后访问时间查询
+			4、-ctime num    :  最后改变时间查询
+			5、-perm mode(数字/字符形式)  ：按权限和用户方式查询  
+				find ./ -perm 664 
+			    find ./ -perm /u=rw
+		5、对找到的文件执行动作
+			1、-exec 指令动作 {} \;     {} 占位符，替换find 找到的文件名  \；转义分号，用于终止结束命令
+				find ./ -type f -iname "test*" -exec rm -f {} \;
+				find ./ -iname "test*" -delete                     等价于上面指令
+			2、-exec 指令动作 {} +；      {} 占位符，替换find 找到的文件名，+会将找到的所有文件一次性作为参数传给命令 
+			3、-ok command {} \;: 与 -exec 功能相同，但在执行命令前会交互式地询问用户是否确认，更安全。
+
+xargs 的核心作用：从标准输入（stdin）接收数据，并将这些数据转换为另一个命令的参数
+	1、不能直接用管道传输数据用于下一条指令的处理，即可利用xargs搭建一个可执行的桥梁给下一条指令
+			find . -name "*.tmp" | rm  			# 这行不通！因为 rm 不接受标准输入。
+			find . -name "*.tmp" | xargs rm  	# 这行得通！
+			xargs 会读取 find 传来的文件名列表，然后将这些名字变成 rm 命令后面的参数。
+	2、常用选项与参数
+		-I {}	替换占位符 后续命令中这个字符串的位置会被从标准输入读取的参数替换掉   用于参数需要插入的指令后面时 替换，复制，移动 等命令
+			find ./ -type f -name "test*" | xargs -I {} cp {} ../   找到tset* 并复制到上一级目录  {} 所找到的test*所有文件
+
+		-n num   指定每次命令执行时使用的最大参数个数。
+		-t       在执行命令之前，先在标准错误（stderr）上打印要执行的命令
+		-p       交互式执行。在运行每个命令前都会询问用户是否确认         输入y 确定 n 取消
+		-0/-null 它告诉 xargs 输入的数据不是用空格分隔，而是用 null 字符（\0）分隔。
+			     默认的分隔符（空格、换行）无法正确处理包含空格或换行符的文件名（如 My File.txt）。使用 -0 可以安全地处理任何文件名。
+				 -print0  使用 null 字符分隔输出，以正确处理文件名中的空格
+				 xargs -0 使用 null 字符分隔输入，与 -print0 配合使用
+        3、默认行为
+                1、遇到空格、制表符、换行符 默认一个项目的借宿
+                2、利用-print0 解决find 搜索时的问题/-0 解决xargs命令桥 规避上诉问题 会把这些完整的、未被破坏的文件名作为参数传递给后续命令
+
+read  的核心作用，读取变量赋值参数
+        1、默认分隔符：read 使用 IFS (Internal Field Separator) 环境变量来确定如何分割输入行
+        2、默认 IFS 值：空格、制表符(tab)和换行符
+		3、指定分隔符，在read前添加：IFS=','(分隔符，逗号)  IFS=' '(分隔符 空格)   IFS='	'(分隔符	制表符)
+        4、字段分配：        
+        	第一个字段分配给第一个变量 (timestamp)        
+        	第二个字段分配给第二个变量 (file)        
+        	如果变量数量少于字段数量，最后一个变量会接收剩余的所有字段
+		
+正则表达式：用于描述、匹配一系列符合某个句法规则的字符串
+    元字符：是正则表达式（以及 Shell）的“魔法字符”。这些字符在特定语境下不再表示其字面含义，而是拥有特殊的、约定的功能
+    元字符 | 功能说明 |
+    ：--- | ：--- |
+    . | 匹配任意单个字符（除换行符） |
+    * | 匹配前面的子表达式零次或多次 |
+    + | 匹配前面的子表达式一次或多次 |
+    ? | 匹配前面的子表达式零次或一次 |
+    ^ | 匹配输入字符串的开始位置    ^sed：匹配所有以 "sed" 开头的行
+    $ | 匹配输入字符串的结束位置    sed$：匹配所有以 "sed" 结尾的行
+    [ ] | 定义一个字符集合，匹配方括号内的任意一个字符 |
+    [^ ] | 否定字符集合，匹配不在方括号内的任意一个字符 |
+    ( ) | 定义一个子表达式（捕获组），可用于分组或后续引用 |
+    | | 或操作，匹配左边或右边的表达式 |
+    \ | 转义字符，用于取消下一个字符的特殊含义，使其变为普通字符 |
+
+引号的处理作用：
+    1、单引号：'' 屏蔽能力最强，使得引号内的所有字符失去特殊意义，当做字面字符原封不动传给命令，
+                适用于正则表达式中元字符不会shell误解，而完整的传递给命令工具
+    2、双引号："" 屏蔽大部分元字符特殊含义，除去($ ` \) 
+        ①变量扩展 $var 等价于 ${var}
+        ②命令替换 ($(command)) 等价于 `command`
+        ③算数扩展 $((command))
+        ④预处理阶段 先进行变量替换 
+    3、\ 转义字符，其作用是取消元字符特殊函数
+        ①切勿在双引号中使用转义字符\处理正则表达式中的元字符，要么单引号，要么双重转义
+        ②正则表达式———单引号处理即可
+        ③需要变量扩展———双引号处理即可
+shell 解析的预处理过程
+    1、分词 (Word Splitting)： 根据空格、制表符等将命令行拆分成一个个“单词”。
+    2、展开 (Expansion)： 这是最关键的一步！Shell会识别并处理其中的元字符和特殊符号。
+        变量扩展： 将 $VARIABLE 替换成该变量的值。
+        命令替换： 执行 $(command) 或 `command`，并用其输出结果替换掉这部分内容。
+        通配符展开 (Globbing)： 将 *, ?, [abc] 等模式替换成匹配的文件名列表。
+        波浪号展开： 将 ~ 替换为用户的家目录路径。
+    3、引号处理 (Quote Removal)： 在完成了所有展开之后，Shell会最终移除所有引号（无论是单引号还是双引号）。
+        引号的作用只是在其存在的阶段抑制某些展开，但它们自身不会被传递给最终的命令
+
+uniq 处理文本中相邻的匹配行
+    -c      删除重复内容，并在每一行添加重复的次数
+    -D      只显示重复行，并把重复行都写出来
+    -u      只显示唯一的行，没有重复的行
+    -f n    忽略前n个字段   
+    -s n    跳过前n个字符
+    -w n     对每行第n个字符以后的内容不作对照
+
+终端存在ssh密钥的使用步骤：
+    1、终端查看是否存在ssh:ls -al ~/.ssh   
+        确保私钥权限600(-rw-------)
+        确保公钥权限644（-rw-r--r--）
+    2、打开公钥文件，进行复制:code ~/.ssh/id_rsa.pub
+    3、进行github进行公钥添加，然后终端测试:ssh -T git@github.com       出现以下反馈说明添加成功
+        Hi Izgsyc! You've successfully authenticated, but GitHub does not provide shell access. 
+
+从0到1创建ssh秘钥步骤：
+    1、更现代、更安全的 ed25519 算法生成密钥：ssh-keygen -t ed25519 -C "任意注释名"
+    2、"Enter file in which to save the key (/home/luo/.ssh/id_ed25519):"   一般新建就默认即可，也可以用存在ssh路径覆盖
+    3、"Enter passphrase (empty for no passphrase):"  建议输入一个密码增加保护
+    4、将新私钥添加到 SSH 代理（管理密码）保证每次使用密钥时都重复输入密码
+       确保 ssh-agent 在后台运行：eval "$(ssh-agent -s)"
+       将您新生成的私钥（id_ed25519）添加到代理中：ssh-add ~/.ssh/id_ed25519  
+    5、打开公钥文件添加到github中：
+        cat ~/ssh/id_ed25519.pub
+    6、添加完成后进行链接测试：
+        ssh -T git@github.com
+旧的秘钥不需要后进行删除：
+    1、github中删除ssh即可
+    2、本地终端删除：.ssh目录属于home下的一个隐藏文件
+        本地查询所存在：ls -al ~/ssh
+        删除不需要的：rm ~/ssh/对应文件名
+    
+1. 本地目录第一次初始化仓并建立远程仓跟踪
+    1、在github创建新仓并命名：name1
+    2、进入本地项目目录初始化本地仓并连接远程仓
+        git init
+        git remote add name2 git@github.com:lzqsyc/name1.git    # `name2`是本地对远程仓的标签名  
+    3、添加文件、创建初始提交并推送到远程主分支(默认分支)
+        git add .                                               # 或指定文件 `git add <文件路径>`
+        git commit -m "initial commit"                          # 提交暂存区的标签 "initial commit"
+        git branch -M name3                                     # 本地分支自定义名，可与GitHub默认分支一致如下
+        git push -u name2 name4                                 # 首次推送本地 name3 分支到远程，并创建 name4/name3(同名)分支进行跟踪
+    4、 合并上诉建立本地分支和远程推送：git push -u name2 name3 name4 
+
+2、本地目录项目推送到已存在的远程分支：仓name5/分支name6               # 已知远程仓name5以及其分支name6
+    1、进入本地项目目录初始化本地仓并连接远程仓
+        git init
+        git remote add name2 git@github.com:lzqsyc/name5.git    # `name2`是本地对远程仓的标签名  
+    2、添加文件、创建初始提交并推送到远程主分支(默认分支)
+        git add .                                               # 或指定文件 `git add <文件路径>`
+        git commit -m "initial commit"                          # 提交暂存区的标签 "initial commit"
+        git branch -M name3                                     # 本地分支自定义名，
+    3、本地项目分支推送到已存在的远程分支
+        git push -u name2 name3:name6
+        git branch --set-upstream-name6/name6 name3
+
+3、本地仓及分支的更名与删除
+    1、重命名：
+        git branch -m <旧分支名> <新分支名>  # 重命名当前分支
+        git branch -m <新分支名>            # 如果旧分支名就是当前分支，可省略
+    2、删除本地分支：
+        git branch -d <分支名>   # 安全删除（只在分支已合并后才允许删除）
+        git branch -D <分支名>   # 强制删除（无论是否合并）   
+    3、注意：不能处于要删除的分支上。删除前请先切换到其他分支（如 git checkout main）
+    
+4、远程仓本地标签更名与删除
+    1、重命名远程仓库的本地标签
+        git remote rename <旧标签名> <新标签名>  # 例如：`git remote rename origin github`
+    2、删除远程仓库的本地标签：
+        git remote remove <标签名>
+        
+5、删除远程分支并解除与本地分支跟踪的关系
+    1、删除远程分支
+        git push <远程仓标签名> --delete <远程分支名>              
+        git push <远程仓标签名> :<远程分支名>                      
+        # 示例：本地仓现有分支 origin/feature 跟踪远程仓 origin/feature
+        # 删除`origin`远程的`feature`分支：  git push origin --delete feature   
+    2、进入本地分支：origin/feature 并移除feature 分支与已不存在的远程分支 feature 关联
+        git checkout feature            # 进入目标分支
+        git branch --unset-upstream     # 取消目标分支与上游跟踪关系
+    3、查看分支关系以及状态
+        git branch -a
+        git status
+    4、将当前本地仓分支目标文件推送指定远程仓，并建立远程分支跟踪关系
+        1、先添加+提交更新，然后推送目标远程分支
+            git add 目标文件
+            git commit -m "提交标签"
+        2、建立跟踪关系再推送
+            git branch --set-upstream-to=<远程仓标签名>/<远程分支名> <本地分支名>   # 如果远程分支已存在
+            git push notes <本地分支名>:<远程分支名>
+        3、若没有远程分支，则同时建立跟踪关系并推送并创建远程分支
+            git push -u <远程仓标签名> <本地分支名>:<远程分支名>                    # 或者推送时建立跟踪
+    5、验证状态
+        1、git status
+        2、git branch -v
+
+6、其他常用git仓管理
+        git fetch <远程仓标签>                                    # 远程仓下载最新数据，但不合并（最安全）
+        git status                                              # 查看工作区和暂存区状态
+        git branch                                              # 查看本地分支
+        git branch -r                                           # 查看所有远程分支（远程跟踪分支）
+        git branch -a                                           # 查看所有本地和远程分支
+        git branch -v                                           # 查看本地分支与远程分支跟踪关系
+        git checkout -b f分支名                                  # 切换分支
+        git remote remove <远程仓标签>                            # 移除远程仓标签，删除跟踪关系
+        git remote -v                                           # 查看本地仓关联的所有远程仓库及其URL
+        git ls-remote <远程仓标签名>                              # 查看远程仓库的所有引用（分支、标签等）
+        
