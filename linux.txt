@@ -211,7 +211,7 @@ uniq 处理文本中相邻的匹配行
         git add .                                               # 或指定文件 `git add <文件路径>`
         git commit -m "initial commit"                          # 提交暂存区的标签 "initial commit"
         git branch -M name3                                     # 本地分支自定义名，可与GitHub默认分支一致如下
-        git push -u name2 name4                                 # 首次推送本地 name3 分支到远程，并创建 name4/name3(同名)分支进行跟踪
+        git push -u name2 name4                                 # 首次推送本地 name3 分支到远程，并创建远程 name4/name3(同名)分支进行跟踪
     4、 合并上诉建立本地分支和远程推送：git push -u name2 name3 name4 
 
 2、本地目录项目推送到已存在的远程分支：仓name5/分支name6               # 已知远程仓name5以及其分支name6
@@ -240,7 +240,6 @@ uniq 处理文本中相邻的匹配行
         git remote rename <旧标签名> <新标签名>  # 例如：`git remote rename origin github`
     2、删除远程仓库的本地标签：
         git remote remove <标签名>
-        
 5、删除远程分支并解除与本地分支跟踪的关系
     1、删除远程分支
         git push <远程仓标签名> --delete <远程分支名>              
@@ -267,7 +266,6 @@ uniq 处理文本中相邻的匹配行
         2、git branch -v
 
 6、其他常用git仓管理
-        git fetch <远程仓标签>                                    # 远程仓下载最新数据，但不合并（最安全）
         git status                                              # 查看工作区和暂存区状态
         git branch                                              # 查看本地分支
         git branch -r                                           # 查看所有远程分支（远程跟踪分支）
@@ -277,4 +275,7 @@ uniq 处理文本中相邻的匹配行
         git remote remove <远程仓标签>                            # 移除远程仓标签，删除跟踪关系
         git remote -v                                           # 查看本地仓关联的所有远程仓库及其URL
         git ls-remote <远程仓标签名>                              # 查看远程仓库的所有引用（分支、标签等）
+        git checkout -b 分支名                                   # 建立新的分支并跳转至该分支
+        git fetch <远程仓标签>                                    # 读取远程仓最新数据，但不合并（最安全）
+        git checkout -b 分支名 远程仓/分支名                       # 建立基于远程仓库 `notes` 的 `main` 分支的最新状态”
         
