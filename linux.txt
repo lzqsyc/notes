@@ -278,4 +278,30 @@ uniq 处理文本中相邻的匹配行
         git checkout -b 分支名                                   # 建立新的分支并跳转至该分支
         git fetch <远程仓标签>                                    # 读取远程仓最新数据，但不合并（最安全）
         git checkout -b 分支名 远程仓/分支名                       # 建立基于远程仓库 `notes` 的 `main` 分支的最新状态”
-        
+
+
+
+
+verilator 与gtkwave 安装
+1、linux下verilator 环境配置
+    ①verilator编译依赖并标准的C++编译环境,在ubuntu下的编译依赖安装如下操作
+        sudo apt update
+        sudo apt install build-essential git
+        sudo apt install git perl python3 make autoconf g++ flex bison ccache
+        sudo apt install libgoogle-perftools-dev numactl perl-doc
+        sudo apt install libfl-dev
+        sudo apt install zlib1g zlib1g-dev   
+    ②从Git中获取最新的源码
+        # 1. 克隆官方仓库
+        git clone https://github.com/verilator/verilator
+        # 2. 进入目录并检查稳定版本（可选，但推荐）
+        cd verilator
+        git pull
+        git checkout stable
+        # 3. 准备构建
+        autoconf
+        ./configure      
+        # 4. 编译
+        make -j$(nproc)              # 使用所有CPU核心加速编译
+        # 5. 安装到系统
+        sudo make install            # 可能会出现的问题：/bin/sh: 1: help2man: not found ——>解决：sudo apt install help2man
