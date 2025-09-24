@@ -350,5 +350,50 @@ uniq 处理文本中相邻的匹配行
         sudo make install            # 可能会出现的问题：/bin/sh: 1: help2man: not found ——>解决：sudo apt install help2man
 
 
-******************ysyx-notes-E4**********************
-****************date：2025-9-19***********************
+******************linux系统安装logisim**********************
+*********************date：2025-9-24***********************
+1、java环境配置
+    ①查看java环境配置至少8以上：java --version
+    ②安装java环境
+        # 更新软件包列表
+        sudo apt update
+        # 安装默认的 JRE（Java 运行时环境）
+        sudo apt install default-jre
+        # 如果需要开发功能，也可以安装 JDK  (建议安装，本文是在拥有该开发环境下实现安装的)
+        sudo apt install default-jdk
+    ③再次验证java环境：安装成功输出类似一下文本
+        openjdk 11.0.28 2025-07-15
+        OpenJDK Runtime Environment (build 11.0.28+6-post-Ubuntu-1ubuntu122.04.1)
+        OpenJDK 64-Bit Server VM (build 11.0.28+6-post-Ubuntu-1ubuntu122.04.1, mixed mode, sharing)
+
+2、安装logisim  (强烈建议直接官网下载jar包)
+    ①下载指南推荐一下连接：https://blog.csdn.net/qq_62325622/article/details/134632652
+    ②观看上诉链接至下载完成即可
+
+3、终端执行logisim.jar 软件包 环境配置过程
+    1、进入opt目录下创建logisim软件可执行目录，可命名：logisim
+        法①cd /opt ②mkdir -p logisim
+        法②sudo mkdir -p /opt/logisim
+    2、将官网下载的logisim软件包.jar 包文件移动到刚刚创建目录(/opt/logisim/)里
+        sudo mv /logisim.jar包路径/logisim.jar包名称 /opt/logisim/
+    3、更改软件包权限为可执行文件
+        sudo chmod 755 /opt/logisim/logisim.jar包名称
+    4、注意：<logisim.jar包名称> 是你实际下载的logisim软件包名称，比如我的：logisim-generic-2.7.1.jar
+
+4、创建bash的可执行脚本
+    1、进入/usr/local/bin/创建可执行脚本文件，建议命名：logisim
+        sudo code /usr/local/bin/logisim --no-sandbox --user-data-dir=/root/.vscode    （该执行命令是使用vscode键入）
+        原因在于：vscode属于外部编辑器，/bin/属于root用户，普通用户没有权限
+        vim 或nano 请看下面
+        sudo nano /usr/local/bin/logisim      # 使用 nano
+        sudo vim /usr/local/bin/logisim       # 使用 vim
+    2、创建文件，输入一下内容
+        #!/bin/bash
+        java -jar /opt/logisim/logisim-generic-2.7.1.jar "$@"     
+    3、更改文件权限为可执行文件
+        sudo chmod +x /usr/local/bin/logisim
+    4、终端执行启动Logisim 
+        logisim
+        成功打开软件则表示安装并且环境配置成功
+
+5、配置中文环境
