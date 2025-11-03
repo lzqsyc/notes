@@ -494,3 +494,103 @@ uniq 处理文本中相邻的匹配行
         break <where> if <condition>
     16. 参数地址查看
         p &variable_name
+
+    /*		
+riscv64-linux-gnu-gcc交叉编译
+	1、C源码 → GCC RISC-V前端 → RTL中间表示 → RISC-V后端 → RISC-V机器码
+	2、x86主机编辑代码——>riscv64交叉编译——>qemu模拟riscv架构测试——>riscv硬件运行
+	3、riscv64-linux-gnu-gcc --version   架构+系统+ABI+编译器    交叉编译器
+	4、编译指令方法：一定要增加静态库依赖，否则后续不能进入调试界面
+		方法1：直接编译
+		riscv64-linux-gnu-gcc -static -g source.c -o program
+		方法2：分步编译
+		riscv64-linux-gnu-gcc -E source.c -o source.i              # 预处理
+		riscv64-linux-gnu-gcc -S source.i -o source.s              # 编译  
+		riscv64-linux-gnu-gcc -c source.s -o source.o              # 汇编
+		riscv64-linux-gnu-gcc source.o -o program                  # 链接
+
+利用clang进行riscv64交叉编译
+	1、C源码 → Clang前端 → LLVM IR → LLVM RISC-V后端 → RISC-V机器码
+	2、使用格式：clang --target=riscv64-linux-gnu (target=指定调试架构)
+	3、编译指令步骤：一定要增加静态库依赖，否则后续不能进入调试界面
+		方法1：直接编译（推荐）
+		clang --target=riscv64-linux-gnu -static -g source.c -o program
+		方法2：分步编译（用于学习）
+		clang -E --target=riscv64-linux-gnu source.c -o source.i    # 预处理
+		clang -S --target=riscv64-linux-gnu source.i -o source.s    # 编译
+		clang -c --target=riscv64-linux-gnu source.s -o source.o    # 汇编
+		clang --target=riscv64-linux-gnu source.o -o program        # 链接
+
+x86系统基于riscv64架构下gdb交叉调试
+	1、终端1启动qmeu 调试服务器：qemu-riscv64 -g 1234 program_name
+		-g 1234 表示在端口 1234 开启 GDB 调试服务器，程序会暂停等待连接。
+	2、终端2启动gdb：gdb-multiarch program_name
+	3、架构设置：
+		(gdb) set architecture riscv:rv64        // 设置调试架构
+		(gdb) target remote localhost:1234       // riscv64架构gdb调试远程服务器链接
+	4、gdb 指令调试，命令参数等基本不变
+		(gdb) break main 						 # 设置断点并运行
+		(gdb) continue
+		# 程序会在 main 处暂停，现在开始分析
+		(gdb) disassemble main                   // riscv ISA汇编查看
+		(gdb) stepi								 // 单步执行
+		(gdb) info registers a0 a1 a2 sp s0 pc	 // 寄存器监控
+		(gdb) print i
+
+1、C标准没有规定函数调用中参数的求值顺序。也就是说，编译器可以自由选择先计算哪个参数。因此，不同的编译器或不同的编译设置可能导致不同的结果。
+2、C标准规定，在两个序列点之间，一个对象只能被修改一次。而这里，我们在同一个函数调用中修改了两次i，这属于未定义行为（undefined behavior）。因此，程序的结果是不确定的。
+3、使用clang编译时，编译器给出了警告：multiple unsequenced modifications to 'i'。这意味着编译器检测到了在同一个序列点内多次修改同一个变量。
+4、进入gdb进行调试单步执行进入函数进行查看i的变化情况
+*/
+
+/* 数据类型使用总结：
+1、基本整数类型大小
+    数据类型	32位系统	64位系统	最小保证
+    char	    1字节	    1字节	    1字节
+    short	    2字节	    2字节	    2字节
+    int	        4字节	    4字节	    2字节
+    long	    4字节	    8字节	    4字节
+    long long	8字节	    8字节	    8字节
+
+2. 指针类型大小
+	数据类型		 32位系统	   64位系统
+	任何指针类型	  4字节   		8字节
+
+3. 浮点类型大小
+	数据类型		  大小		说明
+	float			4字节		单精度浮点数
+	double			8字节		双精度浮点数
+	long double		8-16字节	扩展精度，平台相关
+
+4. 精确宽度整数类型（C99标准，来自<stdint.h>）
+	数据类型	  大小		范围
+	int8_t		1字节	-128 到 127
+	uint8_t		1字节	0 到 255
+	int16_t		2字节	-32,768 到 32,767
+	uint16_t	2字节	0 到 65,535
+	int32_t		4字节	-2,147,483,648 到 2,147,483,647
+	uint32_t	4字节	0 到 4,294,967,295
+	int64_t		8字节	-9,223,372,036,854,775,808 到 9,223,372,036,854,775,807
+	uint64_t	8字节	0 到 18,446,744,073,709,551,615
+
+5. 最小宽度整数类型
+	数据类型		最小大小
+	int_least8_t	至少8位
+	int_least16_t	至少16位
+	int_least32_t	至少32位
+	int_least64_t	至少64位
+
+6. 快速整数类型
+	数据类型		说明
+	int_fast8_t		系统处理最快的至少8位整数
+	int_fast16_t	系统处理最快的至少16位整数
+	int_fast32_t	系统处理最快的至少32位整数
+	int_fast64_t	系统处理最快的至少64位整数
+
+7、移位知识点
+
+操作符	 名称	 规则（无符号/有符号正数）	     规则（有符号负数）	            等效数学运算（无溢出）
+<<	    左移	高位丢弃，低位补0	           同左（但溢出行为复杂）	      乘以 2^n
+>>	    右移	低位丢弃，高位补0 (逻辑右移)	低位丢弃，高位补1 (算术右移)	除以 2^n (向负无穷取整)
+
+*/	
