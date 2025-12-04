@@ -163,18 +163,95 @@
 
 ---
 
-## 4. 其他
+## 4. GitHub 多设备多账号协同开发指南
 
-### Logisim 安装
-- **环境**：需 Java 环境 (`sudo apt install default-jre`)。
-- **运行**：`java -jar logisim.jar`
-- **脚本化**：创建 `/usr/local/bin/logisim` 脚本以便直接运行。
+### 场景描述
+- **设备**：3台电脑 (电脑A, 电脑B, 电脑C)
+- **账号**：2个 GitHub 账号 (Account_Main, Account_Sub)
+- **目标**：针对同一个项目 (Repo_Target) 进行协同开发。
 
-### C 语言数据类型与位运算
-- **数据类型大小** (32/64位系统)：
-  - `int`: 4字节
-  - `long`: 4字节(32位) / 8字节(64位)
-  - `pointer`: 4字节(32位) / 8字节(64位)
-- **移位运算**：
-  - `<<`：左移，低位补0。
-  - `>>`：右移。逻辑右移补0，算术右移补符号位。
+### 权限配置 (前置准备)
+由于是私有项目或为了规范权限，建议将 Account_Sub 添加为仓库的协作者 (Collaborator)。
+1. 登录 Account_Main 的 GitHub。
+2. 进入项目仓库 -> **Settings** -> **Collaborators**。
+3. 点击 **Add people**，输入 Account_Sub 的用户名或邮箱邀请。
+4. 登录 Account_Sub 接受邀请。
+
+### 多账号 SSH 配置 (单台电脑使用多账号)
+如果某台电脑需要同时使用两个账号，或者不同电脑使用不同账号，建议通过 SSH Config 管理。
+
+#### 1. 生成 SSH Key
+为每个账号生成独立的 Key：
+```bash
+# 为主账号生成
+ssh-keygen -t ed25519 -C "main@email.com" -f ~/.ssh/id_ed25519_main
+
+# 为副账号生成
+ssh-keygen -t ed25519 -C "sub@email.com" -f ~/.ssh/id_ed25519_sub
+```
+
+#### 2. 配置 `~/.ssh/config`
+编辑或创建 `~/.ssh/config` 文件：
+```ssh
+# Main Account
+Host github.com-main
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_main
+
+# Sub Account
+Host github.com-sub
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_sub
+```
+
+#### 3. 仓库远程地址设置
+在克隆或添加远程仓库时，使用别名：
+- 主账号操作：`git clone git@github.com-main:User/Repo.git`
+- 副账号操作：`git clone git@github.com-sub:User/Repo.git`
+
+### 协同工作流 (Workflow)
+
+#### 核心原则
+**"先拉后推" (Pull before Push)**：每次开始工作前，先 `git pull`；每次推送前，也建议先 `git pull` 以避免冲突。
+
+#### 操作演示
+**场景**：电脑A (Account_Main) 更新了代码，电脑B (Account_Sub) 需要继续开发。
+
+1.  **电脑A (Account_Main)**:
+    ```bash
+    git add .
+    git commit -m "Feature A done"
+    git push origin main
+    ```
+
+2.  **电脑B (Account_Sub)**:
+    *   **开始工作前**：
+        ```bash
+        git pull origin main  # 同步电脑A的修改
+        ```
+    *   **进行开发**...
+    *   **提交更改**：
+        ```bash
+        git add .
+        git commit -m "Feature B done"
+        ```
+    *   **推送**：
+        ```bash
+        git push origin main
+        ```
+
+3.  **电脑C (Account_Main)**:
+    *   **开始工作前**：
+        ```bash
+        git pull origin main # 同步电脑A和B的修改
+        ```
+
+### 常见问题处理
+- **冲突 (Conflict)**：
+    - 当 `git pull` 提示冲突时，打开冲突文件，手动保留需要的代码。
+    - 修改完成后，再次 `git add` -> `git commit` -> `git push`。
+- **身份标识 (Git Config)**：
+    - 确保每台电脑的本地 Git 用户名和邮箱配置正确，以便区分是谁提交的代码。
+    - 局部配置（推荐）：在项目目录下 `git config user.name "Sub_Name"` 和 `git config user.email "sub@email.com"`。
