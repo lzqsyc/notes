@@ -2,6 +2,16 @@
 
 > 资料来源：`linux.txt` 原始速记。现已整理为章节化的 Markdown，便于检索与扩展。
 
+## 目录
+- [1. 文件与重定向基础](#1-文件与重定向基础)
+- [2. 文本处理工具大全](#2-文本处理工具大全)
+- [3. 权限与历史命令](#3-权限与历史命令)
+- [4. 文件查找与批处理](#4-文件查找与批处理)
+- [5. 输入读取与-shell-行为](#5-输入读取与-shell-行为)
+- [6. 磁盘与文件系统](#6-磁盘与文件系统)
+- [7. 图形与模拟工具](#7-图形与模拟工具)
+- [8. 开发与调试工具链](#8-开发与调试工具链)
+
 ## 1. 文件与重定向基础
 
 - `echo "hello" > linux.txt`：覆盖写入文件。
@@ -200,29 +210,6 @@
 	 make -j"$(nproc)"
 	 sudo make install  # 若提示 help2man 缺失：sudo apt install help2man
 	 ```
-
-### 7.2 Logisim 安装
-
-1. 确认 Java ≥ 8：`java --version`
-2. 安装 JRE/JDK：
-	 ```bash
-	 sudo apt update
-	 sudo apt install default-jre default-jdk
-	 ```
-3. 将下载的 `logisim-*.jar` 放入 `/opt/logisim`
-4. 赋予执行权限：`sudo chmod 755 /opt/logisim/logisim-*.jar`
-5. （可选）使用具备 root 权限的编辑器创建脚本，例如：
-	```bash
-	sudo code /usr/local/bin/logisim --no-sandbox --user-data-dir=/root/.vscode
-	# 或者使用 sudo nano /usr/local/bin/logisim
-	```
-6. 创建快捷脚本 `/usr/local/bin/logisim`：
-	 ```bash
-	 #!/bin/bash
-	 java -jar /opt/logisim/logisim-generic-2.7.1.jar "$@"
-	 ```
-7. 授权：`sudo chmod +x /usr/local/bin/logisim`
-8. 启动：`logisim`
 
 ## 8. 开发与调试工具链
 
